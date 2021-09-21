@@ -1,30 +1,57 @@
 <template>
-  <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
-  </div>
-  <router-view />
+  <Navbar
+    :cart="cart"
+    :toggle="toggleSidebar"
+  />
+  <router-view
+    :add_to_cart="addToCart"
+    :inventory="inventory"
+  />
+  <Sidebar
+    v-if="showSidebar"
+    :cart="cart"
+    :toggle="toggleSidebar"
+    :remove_from_cart="removeFromCart"
+  />
 </template>
 
-<style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
+<script>
+import Navbar from "./components/Navbar";
+import Sidebar from "./components/Sidebar";
+import food from "@/assets/food.json";
 
-#nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
+export default {
+  data() {
+    return {
+      showSidebar: false,
+      inventory: food,
+      cart: []
+    };
+  },
+  methods: {
+    toggleSidebar() {
+      this.showSidebar = !this.showSidebar;
+    },
+    addToCart(product) {
+      const p = JSON.parse(JSON.stringify(product));
+      const productExistsInCart = this.cart.findIndex((item) => {
+        return item.id === p.id;
+      });
+      if (productExistsInCart > -1) {
+        this.cart[productExistsInCart].quantity += p.quantity;
+      } else {
+        this.cart.push(p);
+      }
+      product.quantity = 0;
+    },
+    removeFromCart(product) {
+      const index = this.cart.findIndex((item) => {
+        return item.id === product.id;
+      });
+      this.cart.splice(index, 1);
     }
-  }
-}
-</style>
+  },
+  components: { Sidebar, Navbar }
+};
+
+</script>
